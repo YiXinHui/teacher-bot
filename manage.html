@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学员管理工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .section h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        
+        .btn-success {
+            background: #4caf50;
+            color: white;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+            font-size: 14px;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .badge-teacher {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+        
+        .code-output {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+        
+        .copy-btn:hover {
+            background: #5568d3;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card .label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .success-message {
+            background: #e8f5e9;
+            border: 1px solid #4caf50;
+            color: #2e7d32;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 学员管理工具</h1>
+        <p class="subtitle">添加学员、管理Bot、生成配置文件</p>
+        
+        <!-- 统计卡片 -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="number" id="totalStudents">0</div>
+                <div class="label">总学员数</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="totalTeachers">0</div>
+                <div class="label">老师数量</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="totalBots">0</div>
+                <div class="label">Bot数量</div>
+            </div>
+        </div>
+        
+        <!-- 添加学员 -->
+        <div class="section">
+            <h2>➕ 添加学员</h2>
+            
+            <div id="successMsg" class="success-message"></div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>学号 *</label>
+                    <input type="text" id="studentId" placeholder="20240001">
+                </div>
+                <div class="form-group">
+                    <label>密码 *</label>
+                    <input type="text" id="password" placeholder="123456" value="123456">
+                </div>
+                <div class="form-group">
+                    <label>姓名 *</label>
+                    <input type="text" id="studentName" placeholder="张三">
+                </div>
+                <div class="form-group">
+                    <label>老师名称 *</label>
+                    <input type="text" id="teacherName" placeholder="张老师">
+                </div>
+                <div class="form-group">
+                    <label>Bot ID *</label>
+                    <input type="text" id="botId" placeholder="7585150421019852842">
+                </div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="addStudent()">添加学员</button>
+        </div>
+        
+        <!-- 学员列表 -->
+        <div class="section">
+            <h2>📋 学员列表</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>学号</th>
+                        <th>姓名</th>
+                        <th>老师</th>
+                        <th>Bot ID</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="studentTableBody">
+                    <!-- 动态生成 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- 生成配置文件 -->
+        <div class="section">
+            <h2>📄 生成配置文件</h2>
+            <p style="color: #666; margin-bottom: 15px; font-size: 14px;">
+                点击下方按钮生成 config.js 文件内容，复制后替换原文件中的配置即可。
+            </p>
+            <button class="btn btn-success" onclick="generateConfig()">生成 config.js</button>
+            <button class="copy-btn" onclick="copyConfig()">📋 复制代码</button>
+            
+            <div class="code-output" id="configOutput" style="display: none; margin-top: 15px;"></div>
+        </div>
+    </div>
+
+    <script>
+        // 存储学员数据
+        let students = [
+            {
+                studentId: '20240001',
+                password: '123456',
+                name: '张三',
+                teacherName: '张老师',
+                botId: '7585150421019852842'
+            },
+            {
+                studentId: '20240002',
+                password: '123456',
+                name: '李四',
+                teacherName: '张老师',
+                botId: '7585150421019852842'
+            },
+            {
+                studentId: '20240003',
+                password: '123456',
+                name: '王五',
+                teacherName: '张老师',
+                botId: '7585150421019852842'
+            }
+        ];
+        
+        // 初始化
+        window.onload = function() {
+            updateStats();
+            renderTable();
+        };
+        
+        // 添加学员
+        function addStudent() {
+            const studentId = document.getElementById('studentId').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const name = document.getElementById('studentName').value.trim();
+            const teacherName = document.getElementById('teacherName').value.trim();
+            const botId = document.getElementById('botId').value.trim();
+            
+            if (!studentId || !password || !name || !teacherName || !botId) {
+                alert('请填写所有必填项');
+                return;
+            }
+            
+            // 检查学号是否已存在
+            if (students.find(s => s.studentId === studentId)) {
+                alert('该学号已存在');
+                return;
+            }
+            
+            // 添加学员
+            students.push({
+                studentId,
+                password,
+                name,
+                teacherName,
+                botId
+            });
+            
+            // 清空输入
+            document.getElementById('studentId').value = '';
+            document.getElementById('password').value = '123456';
+            document.getElementById('studentName').value = '';
+            document.getElementById('teacherName').value = '';
+            document.getElementById('botId').value = '';
+            
+            // 显示成功消息
+            showSuccess(`成功添加学员：${name} (${studentId})，密码：${password}`);
+            
+            // 更新界面
+            updateStats();
+            renderTable();
+        }
+        
+        // 删除学员
+        function deleteStudent(studentId) {
+            if (confirm('确定要删除这个学员吗？')) {
+                students = students.filter(s => s.studentId !== studentId);
+                updateStats();
+                renderTable();
+                showSuccess('学员已删除');
+            }
+        }
+        
+        // 更新统计数据
+        function updateStats() {
+            document.getElementById('totalStudents').textContent = students.length;
+            
+            const uniqueTeachers = [...new Set(students.map(s => s.teacherName))];
+            document.getElementById('totalTeachers').textContent = uniqueTeachers.length;
+            
+            const uniqueBots = [...new Set(students.map(s => s.botId))];
+            document.getElementById('totalBots').textContent = uniqueBots.length;
+        }
+        
+        // 渲染表格
+        function renderTable() {
+            const tbody = document.getElementById('studentTableBody');
+            
+            if (students.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">暂无学员数据</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = students.map(student => `
+                <tr>
+                    <td>${student.studentId}</td>
+                    <td>${student.name}</td>
+                    <td><span class="badge badge-teacher">${student.teacherName}</span></td>
+                    <td style="font-family: monospace; font-size: 12px;">${student.botId}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="deleteStudent('${student.studentId}')">删除</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        // 生成配置文件
+        function generateConfig() {
+            const token = 'pat_TKPDH03KSYWTGmpng5vib4Z2MmQFVG8p5FiK5YykQ0ZiISpSTlcOdGbEiRr0aNFH';
+            
+            let configCode = `// ===================================
+// 扣子API配置
+// ===================================
+const COZE_CONFIG = {
+    token: '${token}',
+    apiUrl: 'https://api.coze.cn/v3/chat'
+};
+
+// ===================================
+// 学员配置
+// 总计：${students.length} 个学员
+// ===================================
+const STUDENTS_CONFIG = [
+`;
+            
+            students.forEach((student, index) => {
+                configCode += `    {
+        studentId: '${student.studentId}',
+        password: '${student.password}',
+        name: '${student.name}',
+        teacherName: '${student.teacherName}',
+        botId: '${student.botId}'
+    }${index < students.length - 1 ? ',' : ''}
+`;
+            });
+            
+            configCode += `];`;
+            
+            const output = document.getElementById('configOutput');
+            output.textContent = configCode;
+            output.style.display = 'block';
+            
+            showSuccess('配置文件已生成！点击"复制代码"按钮复制内容');
+        }
+        
+        // 复制配置
+        function copyConfig() {
+            const output = document.getElementById('configOutput');
+            
+            if (!output.textContent) {
+                alert('请先点击"生成 config.js"按钮');
+                return;
+            }
+            
+            navigator.clipboard.writeText(output.textContent).then(() => {
+                alert('✅ 已复制到剪贴板！\n\n下一步：\n1. 打开 config.js 文件\n2. 粘贴替换全部内容\n3. 保存文件');
+            }).catch(() => {
+                alert('复制失败，请手动复制');
+            });
+        }
+        
+        // 显示成功消息
+        function showSuccess(message) {
+            const msgDiv = document.getElementById('successMsg');
+            msgDiv.textContent = message;
+            msgDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                msgDiv.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
