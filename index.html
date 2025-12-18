@@ -3,659 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智能助教系统</title>
+    <title>智能助教系统 (元器版)</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        /* 保持原有的漂亮样式，无需变动 */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: linear-gradient(135deg, #0052D9 0%, #366EF4 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .container { background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 100%; max-width: 400px; overflow: hidden; height: 80vh; max-height: 700px; display: flex; flex-direction: column; }
         
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
+        /* 登录页 */
+        .login-page { padding: 40px; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .logo { font-size: 40px; margin-bottom: 20px; }
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 8px; color: #333; font-weight: 500; }
+        .input-group input { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; transition: 0.3s; }
+        .input-group input:focus { border-color: #0052D9; outline: none; }
+        .btn { width: 100%; padding: 12px; background: #0052D9; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; transition: 0.3s; }
+        .btn:hover { background: #003C9D; }
+        .error-msg { color: red; font-size: 12px; margin-bottom: 10px; display: none; }
+
+        /* 聊天页 */
+        .chat-page { display: none; flex: 1; flex-direction: column; height: 100%; }
+        .chat-header { background: #0052D9; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; background: #f5f5f5; }
+        .message { margin-bottom: 15px; display: flex; gap: 10px; }
+        .message.user { flex-direction: row-reverse; }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; background: #ddd; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+        .message-content { max-width: 75%; padding: 10px 14px; border-radius: 12px; background: white; font-size: 14px; line-height: 1.5; word-wrap: break-word; }
+        .message.user .message-content { background: #0052D9; color: white; }
+        .input-area { padding: 15px; background: white; border-top: 1px solid #eee; display: flex; gap: 10px; }
+        .chat-input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px; resize: none; outline: none; }
+        .send-btn { width: 40px; height: 40px; background: #0052D9; color: white; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         
-        .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            width: 100%;
-            max-width: 400px;
-            overflow: hidden;
-        }
-        
-        /* 登录页面 */
-        .login-page {
-            padding: 60px 40px;
-            text-align: center;
-        }
-        
-        .logo {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 20px;
-            margin: 0 auto 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-        }
-        
-        .login-page h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 28px;
-        }
-        
-        .login-page .subtitle {
-            color: #666;
-            margin-bottom: 40px;
-            font-size: 14px;
-        }
-        
-        .input-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-        
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-            font-size: 14px;
-        }
-        
-        .input-group input {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
-        
-        .input-group input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
-        .btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        
-        .btn:active {
-            transform: translateY(0);
-        }
-        
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .tips {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            font-size: 12px;
-            color: #666;
-            text-align: left;
-        }
-        
-        .tips strong {
-            color: #333;
-            display: block;
-            margin-bottom: 5px;
-        }
-        
-        /* 聊天页面 */
-        .chat-page {
-            display: none;
-            height: 600px;
-            flex-direction: column;
-        }
-        
-        .chat-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .chat-header-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .teacher-avatar {
-            width: 40px;
-            height: 40px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-        }
-        
-        .teacher-info h2 {
-            font-size: 16px;
-            margin-bottom: 2px;
-        }
-        
-        .teacher-info p {
-            font-size: 12px;
-            opacity: 0.9;
-        }
-        
-        .logout-btn {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 6px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.3s;
-        }
-        
-        .logout-btn:hover {
-            background: rgba(255,255,255,0.3);
-        }
-        
-        .chat-messages {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            background: #f5f5f5;
-        }
-        
-        .message {
-            margin-bottom: 20px;
-            display: flex;
-            gap: 12px;
-            animation: slideIn 0.3s ease;
-        }
-        
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .message.user {
-            flex-direction: row-reverse;
-        }
-        
-        .message-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: #667eea;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 14px;
-            flex-shrink: 0;
-        }
-        
-        .message.user .message-avatar {
-            background: #764ba2;
-        }
-        
-        .message-content {
-            max-width: 70%;
-            padding: 12px 16px;
-            border-radius: 12px;
-            background: white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-            line-height: 1.6;
-            font-size: 14px;
-        }
-        
-        .message.user .message-content {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
-        .message.loading .message-content {
-            padding: 20px;
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-        }
-        
-        .typing-indicator {
-            width: 8px;
-            height: 8px;
-            background: #667eea;
-            border-radius: 50%;
-            animation: typing 1.4s infinite;
-        }
-        
-        .typing-indicator:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-        
-        .typing-indicator:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-        
-        @keyframes typing {
-            0%, 60%, 100% {
-                transform: translateY(0);
-            }
-            30% {
-                transform: translateY(-10px);
-            }
-        }
-        
-        .chat-input-area {
-            padding: 20px;
-            background: white;
-            border-top: 1px solid #e0e0e0;
-        }
-        
-        .input-wrapper {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .chat-input {
-            flex: 1;
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 25px;
-            font-size: 14px;
-            resize: none;
-            font-family: inherit;
-            transition: border-color 0.3s;
-        }
-        
-        .chat-input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        .send-btn {
-            width: 50px;
-            height: 50px;
-            padding: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.2s;
-        }
-        
-        .send-btn:hover {
-            transform: scale(1.05);
-        }
-        
-        .send-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .hidden {
-            display: none !important;
-        }
-        
-        .error-message {
-            background: #fee;
-            border: 1px solid #fcc;
-            color: #c33;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            font-size: 13px;
-        }
+        .loading .message-content { color: #888; font-style: italic; }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- 登录页面 -->
-        <div class="login-page" id="loginPage">
-            <div class="logo">🎓</div>
-            <h1>智能助教系统</h1>
-            <p class="subtitle">输入学号开始学习</p>
-            
-            <div id="errorMsg" class="error-message hidden"></div>
-            
+        <div id="loginPage" class="login-page">
+            <div class="logo">🐧</div>
+            <h2 style="margin-bottom: 10px;">元器智能助教</h2>
+            <p style="color: #666; margin-bottom: 30px; font-size: 14px;">请输入学号开始学习</p>
+            <div id="errorMsg" class="error-msg">账号或密码错误</div>
             <div class="input-group">
                 <label>学号</label>
-                <input 
-                    type="text" 
-                    id="studentIdInput" 
-                    placeholder="请输入你的学号"
-                    maxlength="20"
-                >
+                <input type="text" id="studentId" placeholder="例如：20240001">
             </div>
-            
             <div class="input-group">
                 <label>密码</label>
-                <input 
-                    type="password" 
-                    id="passwordInput" 
-                    placeholder="请输入密码"
-                    maxlength="20"
-                    onkeypress="handleLoginKeyPress(event)"
-                >
+                <input type="password" id="password" placeholder="请输入密码">
             </div>
-            
-            <button class="btn" id="loginBtn" onclick="handleLogin()">
-                开始学习
-            </button>
-            
-            <div class="tips">
-                <strong>💡 使用提示</strong>
-                输入学号后，系统会自动连接到你的专属助教老师
-            </div>
+            <button class="btn" onclick="login()">登录</button>
         </div>
-        
-        <!-- 聊天页面 -->
-        <div class="chat-page" id="chatPage">
+
+        <div id="chatPage" class="chat-page">
             <div class="chat-header">
-                <div class="chat-header-left">
-                    <div class="teacher-avatar">👨‍🏫</div>
-                    <div class="teacher-info">
-                        <h2 id="teacherName">智能助教</h2>
-                        <p>在线 · 随时为你解答</p>
-                    </div>
+                <div>
+                    <span style="font-size: 14px; opacity: 0.8;">当前助教</span>
+                    <div style="font-weight: bold;" id="teacherNameDisplay">林雨老师</div>
                 </div>
-                <button class="logout-btn" onclick="handleLogout()">退出</button>
+                <button onclick="logout()" style="background:none; border:1px solid rgba(255,255,255,0.3); color:white; padding: 4px 10px; border-radius: 12px; cursor: pointer; font-size: 12px;">退出</button>
             </div>
-            
-            <div class="chat-messages" id="chatMessages">
+            <div id="messages" class="chat-messages">
                 <div class="message">
-                    <div class="message-avatar">🤖</div>
-                    <div class="message-content">
-                        你好！我是你的智能助教，有什么问题可以随时问我哦~ 😊
-                    </div>
+                    <div class="avatar">🤖</div>
+                    <div class="message-content">你好！我是你的智能助教，请问有什么可以帮你？</div>
                 </div>
             </div>
-            
-            <div class="chat-input-area">
-                <div class="input-wrapper">
-                    <textarea 
-                        class="chat-input" 
-                        id="chatInput" 
-                        placeholder="输入你的问题..."
-                        rows="1"
-                        onkeydown="handleKeyDown(event)"
-                    ></textarea>
-                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
-                        ➤
-                    </button>
-                </div>
+            <div class="input-area">
+                <textarea id="input" class="chat-input" rows="1" placeholder="输入问题..." onkeydown="if(event.keyCode==13 && !event.shiftKey){event.preventDefault();sendMessage()}"></textarea>
+                <button class="send-btn" onclick="sendMessage()">➤</button>
             </div>
         </div>
     </div>
 
     <script src="config.js"></script>
     <script>
-        // 当前学员信息
-        let currentStudent = null;
-        let conversationId = null;
-        
-        // 页面加载时检查登录状态
-        window.onload = function() {
-            const savedStudent = localStorage.getItem('currentStudent');
-            if (savedStudent) {
-                currentStudent = JSON.parse(savedStudent);
-                showChatPage();
-            }
-        };
-        
-        // 登录处理
-        async function handleLogin() {
-            const studentId = document.getElementById('studentIdInput').value.trim();
-            const password = document.getElementById('passwordInput').value.trim();
+        let currentUser = null;
+
+        // 登录逻辑
+        function login() {
+            const sid = document.getElementById('studentId').value.trim();
+            const pwd = document.getElementById('password').value.trim();
+            const user = STUDENTS_CONFIG.find(s => s.studentId === sid && s.password === pwd);
             
-            if (!studentId) {
-                showError('请输入学号');
-                return;
-            }
-            
-            if (!password) {
-                showError('请输入密码');
-                return;
-            }
-            
-            // 查找学员信息
-            const student = STUDENTS_CONFIG.find(s => s.studentId === studentId);
-            
-            if (!student) {
-                showError('学号不存在，请联系管理员');
-                return;
-            }
-            
-            // 验证密码
-            if (student.password !== password) {
-                showError('密码错误，请重试');
-                return;
-            }
-            
-            // 保存登录状态
-            currentStudent = student;
-            localStorage.setItem('currentStudent', JSON.stringify(student));
-            
-            showChatPage();
-        }
-        
-        // 回车登录
-        function handleLoginKeyPress(event) {
-            if (event.key === 'Enter') {
-                handleLogin();
+            if (user) {
+                currentUser = user;
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('chatPage').style.display = 'flex';
+                document.getElementById('teacherNameDisplay').innerText = user.teacherName;
+                document.getElementById('errorMsg').style.display = 'none';
+            } else {
+                document.getElementById('errorMsg').style.display = 'block';
             }
         }
-        
-        // 显示聊天页面
-        function showChatPage() {
-            document.getElementById('loginPage').classList.add('hidden');
-            document.getElementById('chatPage').style.display = 'flex';
-            document.getElementById('teacherName').textContent = currentStudent.teacherName + ' 助教';
-            
-            // 清空输入框
-            document.getElementById('chatInput').value = '';
-            document.getElementById('chatInput').focus();
+
+        function logout() {
+            location.reload();
         }
-        
-        // 发送消息
+
+        // 核心：适配腾讯元器/OpenAI格式的发送逻辑
         async function sendMessage() {
-            const input = document.getElementById('chatInput');
-            const message = input.value.trim();
-            
-            if (!message) return;
-            
-            // 显示用户消息
-            addMessage(message, 'user');
+            const input = document.getElementById('input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            // 1. 显示用户消息
+            addMessage('user', text);
             input.value = '';
-            
-            // 禁用发送按钮
-            const sendBtn = document.getElementById('sendBtn');
-            sendBtn.disabled = true;
-            
-            // 显示加载动画
-            const loadingMsg = addLoadingMessage();
-            
+
+            // 2. 显示加载中
+            const loadingId = addMessage('ai', '思考中...', true);
+
             try {
-                // 调用扣子API
-                const response = await fetch('https://api.coze.cn/v3/chat', {
+                // 腾讯元器 API 调用 (OpenAI 兼容模式)
+                const response = await fetch(YUANQI_CONFIG.apiUrl, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${COZE_CONFIG.token}`,
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${YUANQI_CONFIG.token}`
                     },
                     body: JSON.stringify({
-                        bot_id: currentStudent.botId,
-                        user_id: currentStudent.studentId,
-                        stream: false,
-                        additional_messages: [
-                            {
-                                role: 'user',
-                                content: message,
-                                content_type: 'text'
-                            }
-                        ]
+                        model: currentUser.agentId, // 这里传入智能体ID
+                        messages: [
+                            { role: 'user', content: text }
+                        ],
+                        stream: false
                     })
                 });
-                
-                if (!response.ok) {
-                    throw new Error('网络请求失败');
-                }
-                
+
                 const data = await response.json();
                 
-                // 移除加载动画
-                loadingMsg.remove();
-                
-                // 处理返回的消息
-                if (data.data && data.data.messages) {
-                    const assistantMsg = data.data.messages.find(m => m.role === 'assistant');
-                    if (assistantMsg && assistantMsg.content) {
-                        addMessage(assistantMsg.content, 'assistant');
-                    } else {
-                        addMessage('抱歉，我现在无法回答，请稍后再试。', 'assistant');
-                    }
+                // 移除加载状态
+                removeMessage(loadingId);
+
+                // 解析返回结果 (OpenAI 格式)
+                if (data.choices && data.choices.length > 0) {
+                    addMessage('ai', data.choices[0].message.content);
+                } else if (data.error) {
+                    addMessage('ai', `出错了: ${data.error.message}`);
                 } else {
-                    addMessage('抱歉，我现在无法回答，请稍后再试。', 'assistant');
+                    addMessage('ai', '抱歉，服务暂时不可用。');
                 }
-                
-            } catch (error) {
-                console.error('发送消息错误:', error);
-                loadingMsg.remove();
-                addMessage('抱歉，发生了错误，请稍后重试。', 'assistant');
-            } finally {
-                sendBtn.disabled = false;
-                input.focus();
+
+            } catch (e) {
+                removeMessage(loadingId);
+                addMessage('ai', '网络连接失败，请检查控制台。');
+                console.error(e);
             }
         }
-        
-        // 添加消息到界面
-        function addMessage(text, type) {
-            const messagesDiv = document.getElementById('chatMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${type}`;
-            
-            const avatar = type === 'user' ? currentStudent.name.charAt(0) : '🤖';
-            
-            messageDiv.innerHTML = `
-                <div class="message-avatar">${avatar}</div>
-                <div class="message-content">${formatMessage(text)}</div>
+
+        // 界面辅助函数
+        function addMessage(role, text, isLoading = false) {
+            const box = document.getElementById('messages');
+            const div = document.createElement('div');
+            div.className = `message ${role} ${isLoading ? 'loading' : ''}`;
+            div.id = isLoading ? 'loading-msg' : ('msg-' + Date.now());
+            div.innerHTML = `
+                <div class="avatar">${role === 'user' ? '🧑‍🎓' : '🐧'}</div>
+                <div class="message-content">${text}</div>
             `;
-            
-            messagesDiv.appendChild(messageDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            
-            return messageDiv;
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+            return div.id;
         }
-        
-        // 添加加载动画
-        function addLoadingMessage() {
-            const messagesDiv = document.getElementById('chatMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message loading';
-            
-            messageDiv.innerHTML = `
-                <div class="message-avatar">🤖</div>
-                <div class="message-content">
-                    <div class="typing-indicator"></div>
-                    <div class="typing-indicator"></div>
-                    <div class="typing-indicator"></div>
-                </div>
-            `;
-            
-            messagesDiv.appendChild(messageDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            
-            return messageDiv;
-        }
-        
-        // 格式化消息（处理换行）
-        function formatMessage(text) {
-            return text.replace(/\n/g, '<br>');
-        }
-        
-        // 回车发送（Shift+Enter换行）
-        function handleKeyDown(event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                sendMessage();
-            }
-        }
-        
-        // 显示错误信息
-        function showError(message) {
-            const errorDiv = document.getElementById('errorMsg');
-            errorDiv.textContent = message;
-            errorDiv.classList.remove('hidden');
-            
-            setTimeout(() => {
-                errorDiv.classList.add('hidden');
-            }, 3000);
-        }
-        
-        // 退出登录
-        function handleLogout() {
-            if (confirm('确定要退出吗？')) {
-                localStorage.removeItem('currentStudent');
-                currentStudent = null;
-                conversationId = null;
-                
-                document.getElementById('loginPage').classList.remove('hidden');
-                document.getElementById('chatPage').style.display = 'none';
-                document.getElementById('chatMessages').innerHTML = `
-                    <div class="message">
-                        <div class="message-avatar">🤖</div>
-                        <div class="message-content">
-                            你好！我是你的智能助教，有什么问题可以随时问我哦~ 😊
-                        </div>
-                    </div>
-                `;
-                document.getElementById('studentIdInput').value = '';
-                document.getElementById('passwordInput').value = '';
-            }
+
+        function removeMessage(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
         }
     </script>
 </body>
