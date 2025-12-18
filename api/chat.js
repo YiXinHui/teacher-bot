@@ -1,12 +1,12 @@
-// 这个文件必须放在 api 文件夹里，名字叫 chat.js
+// 文件路径: api/chat.js
+
 export default async function handler(req, res) {
-    // 1. 设置跨域头，允许浏览器访问
+    // 1. 设置跨域头，允许网页访问
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    // 2. 如果是浏览器试探性请求(OPTIONS)，直接通过
     if (req.method === 'OPTIONS') {
         res.status(200).end();
         return;
@@ -14,27 +14,35 @@ export default async function handler(req, res) {
 
     const { token, agentId, message } = req.body;
 
-    // 3. 检查参数
     if (!token || !agentId || !message) {
-        return res.status(400).json({ success: false, error: '缺少 Token 或 ID' });
+        return res.status(400).json({ success: false, error: '缺少参数' });
     }
 
     try {
         console.log("正在连接腾讯元器...");
         
-        // 4. Vercel 帮你去请求腾讯元器
-        const response = await fetch('https://yuanqi.tencent.com/openapi/v1/chat/completions', {
+        // ✅ 1. 使用你确认过的正确网址
+        const yuanqiUrl = 'https://yuanqi.tencent.com/openapi/v1/agent/chat/completions';
+        
+        const response = await fetch(yuanqiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${token}`,
+                'X-Source': 'openapi' // ✅ 2. 加上了这个关键暗号
             },
             body: JSON.stringify({
-                model: agentId,
+                assistant_id: agentId, // ✅ 3. 改正参数名 (model -> assistant_id)
+                user_id: "user_001",   // ✅ 4. 必填的用户ID
+                stream: false,
                 messages: [
-                    { role: 'user', content: message }
-                ],
-                stream: false
+                    {
+                        role: 'user',
+                        content: [ // ✅ 5. 使用严格的数组格式
+                            { type: 'text', text: message }
+                        ]
+                    }
+                ]
             })
         });
 
@@ -45,17 +53,22 @@ export default async function handler(req, res) {
             return res.status(500).json({ success: false, error: data.error.message || '元器API报错' });
         }
 
+        // ✅ 6. 解析返回结果
+        let replyText = "";
         if (data.choices && data.choices.length > 0) {
-            return res.status(200).json({ 
-                success: true, 
-                reply: data.choices[0].message.content 
-            });
+            replyText = data.choices[0].message.content;
+        } else if (data.content) {
+            replyText = data.content;
+        }
+
+        if (replyText) {
+            return res.status(200).json({ success: true, reply: replyText });
         } else {
-            return res.status(500).json({ success: false, error: '元器返回了空内容' });
+            return res.status(500).json({ success: false, error: 'AI回复为空，请检查后台日志' });
         }
 
     } catch (error) {
         console.error('API Error:', error);
-        return res.status(500).json({ success: false, error: 'Vercel 连接失败: ' + error.message });
+        return res.status(500).json({ success: false, error: '连接失败: ' + error.message });
     }
 }
