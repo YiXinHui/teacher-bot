@@ -1,49 +1,32 @@
 // ===================================
-// 扣子API配置
+// 腾讯元器 (Yuanqi) 配置
 // ===================================
-const COZE_CONFIG = {
-    token: 'cztei_qAwaNRpgt3mNIrtUrQvGj5CXfQaURLYCHuY9si9DCkZanwtokMklx71OLhnzyWbBf',
-    apiUrl: 'https://api.coze.cn/v3/chat'
+const YUANQI_CONFIG = {
+    // 🔴 必填：在这里粘贴你的腾讯元器 API Token
+    token: 'V840Q13VN7vbs01x1cSRgztvsd806jeZ', 
+    
+    // 元器的标准接口地址 (OpenAI 兼容版)
+    apiUrl: 'https://yuanqi.tencent.com/openapi/v1/chat/completions'
 };
 
 // ===================================
-// 学员配置
-// 总计：5 个学员
+// 学员与老师配置
 // ===================================
 const STUDENTS_CONFIG = [
     {
-        studentId: '20240001',
+        studentId: '13911686514',
         password: '123456',
-        name: '张三',
+        name: '林同学',
         teacherName: '林雨老师',
-        botId: '7585150421019852842'
+        // 🔴 必填：在这里粘贴林雨老师的智能体 ID
+        agentId: 'wPXzhpYIdign'
     },
     {
         studentId: '20240002',
         password: '123456',
         name: '李四',
         teacherName: '林雨老师',
-        botId: '7585150421019852842'
-    },
-    {
-        studentId: '20240003',
-        password: '123456',
-        name: '王五',
-        teacherName: '林雨老师',
-        botId: '7585150421019852842'
-    },
-    {
-        studentId: '20250101',
-        password: '123456',
-        name: '林同学',
-        teacherName: '林雨老师',
-        botId: '7585150421019852842'
-    },
-    {
-        studentId: '20250102',
-        password: '123456',
-        name: '赵六',
-        teacherName: '林雨老师',
-        botId: '7585150421019852842'
+        // 如果有不同的老师，填那个老师对应的智能体 ID
+        agentId: 'wPXzhpYIdign'
     }
 ];
