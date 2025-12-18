@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智能助教系统 (元器版)</title>
+    <title>林雨老师微信成交AI教练</title>
     <style>
-        /* 保持原有的漂亮样式，无需变动 */
+        /* 保持原有漂亮样式，无需变动 */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: linear-gradient(135deg, #0052D9 0%, #366EF4 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
         .container { background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 100%; max-width: 400px; overflow: hidden; height: 80vh; max-height: 700px; display: flex; flex-direction: column; }
@@ -40,8 +40,8 @@
 <body>
     <div class="container">
         <div id="loginPage" class="login-page">
-            <div class="logo">🐧</div>
-            <h2 style="margin-bottom: 10px;">元器智能助教</h2>
+            <div class="logo">🎓</div>
+            <h2 style="margin-bottom: 10px;">林雨老师微信成交AI教练</h2>
             <p style="color: #666; margin-bottom: 30px; font-size: 14px;">请输入学号开始学习</p>
             <div id="errorMsg" class="error-msg">账号或密码错误</div>
             <div class="input-group">
@@ -101,58 +101,46 @@
             location.reload();
         }
 
-        // 核心：适配腾讯元器/OpenAI格式的发送逻辑
+        // 核心：通过 Vercel 中转发送消息
         async function sendMessage() {
             const input = document.getElementById('input');
             const text = input.value.trim();
             if (!text) return;
 
-            // 1. 显示用户消息
             addMessage('user', text);
             input.value = '';
-
-            // 2. 显示加载中
             const loadingId = addMessage('ai', '思考中...', true);
 
             try {
-                // 腾讯元器 API 调用 (OpenAI 兼容模式)
-                const response = await fetch(YUANQI_CONFIG.apiUrl, {
+                // 修改点2：不再直连腾讯，而是连接我们自己的 /api/chat
+                const response = await fetch('/api/chat', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${YUANQI_CONFIG.token}`
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        model: currentUser.agentId, // 这里传入智能体ID
-                        messages: [
-                            { role: 'user', content: text }
-                        ],
-                        stream: false
+                        token: YUANQI_CONFIG.token, // 把 Token 传给中转站
+                        agentId: currentUser.agentId, // 把智能体ID传给中转站
+                        message: text
                     })
                 });
 
                 const data = await response.json();
-                
-                // 移除加载状态
                 removeMessage(loadingId);
 
-                // 解析返回结果 (OpenAI 格式)
-                if (data.choices && data.choices.length > 0) {
-                    addMessage('ai', data.choices[0].message.content);
-                } else if (data.error) {
-                    addMessage('ai', `出错了: ${data.error.message}`);
+                if (data.success) {
+                    addMessage('ai', data.reply);
                 } else {
-                    addMessage('ai', '抱歉，服务暂时不可用。');
+                    addMessage('ai', `出错了: ${data.error}`);
                 }
 
             } catch (e) {
                 removeMessage(loadingId);
-                addMessage('ai', '网络连接失败，请检查控制台。');
+                addMessage('ai', '网络连接失败，请检查配置。');
                 console.error(e);
             }
         }
 
-        // 界面辅助函数
         function addMessage(role, text, isLoading = false) {
             const box = document.getElementById('messages');
             const div = document.createElement('div');
