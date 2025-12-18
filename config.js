@@ -14,7 +14,7 @@ const YUANQI_CONFIG = {
 // ===================================
 const STUDENTS_CONFIG = [
     {
-        phone: '13800138000',  // 👈 改成了手机号
+        phone: '13911686514',  // 👈 改成了手机号
         password: '123456',
         name: '张三',
         teacherName: '林雨老师',
