@@ -22,7 +22,7 @@ const STUDENTS_CONFIG = [
         agentId: 'wPXzhpYIdign'
     },
     {
-        phone: '13900139000',
+        phone: '13594719905',
         password: '123456',
         name: '李四',
         teacherName: '林雨老师',
