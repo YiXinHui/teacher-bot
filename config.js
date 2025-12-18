@@ -2,7 +2,7 @@
 // 扣子API配置
 // ===================================
 const COZE_CONFIG = {
-    token: 'pat_TKPDH03KSYWTGmpng5vib4Z2MmQFVG8p5FiK5YykQ0ZiISpSTlcOdGbEiRr0aNFH',
+    token: 'cztei_qAwaNRpgt3mNIrtUrQvGj5CXfQaURLYCHuY9si9DCkZanwtokMklx71OLhnzyWbBf',
     apiUrl: 'https://api.coze.cn/v3/chat'
 };
 
