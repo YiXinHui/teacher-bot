@@ -1,17 +1,12 @@
-// 这个文件运行在 Vercel 服务器上，专门负责转发请求给腾讯元器
-// 它可以绕过浏览器的安全限制
-
+// 这个文件必须放在 api 文件夹里，名字叫 chat.js
 export default async function handler(req, res) {
-    // 允许网页跨域访问
+    // 1. 设置跨域头，允许浏览器访问
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-    res.setHeader(
-        'Access-Control-Allow-Headers',
-        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-    );
+    res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    // 如果是预检请求，直接通过
+    // 2. 如果是浏览器试探性请求(OPTIONS)，直接通过
     if (req.method === 'OPTIONS') {
         res.status(200).end();
         return;
@@ -19,12 +14,15 @@ export default async function handler(req, res) {
 
     const { token, agentId, message } = req.body;
 
+    // 3. 检查参数
     if (!token || !agentId || !message) {
-        return res.status(400).json({ success: false, error: '缺少必要参数' });
+        return res.status(400).json({ success: false, error: '缺少 Token 或 ID' });
     }
 
     try {
-        // Vercel 服务器替你向腾讯元器发请求
+        console.log("正在连接腾讯元器...");
+        
+        // 4. Vercel 帮你去请求腾讯元器
         const response = await fetch('https://yuanqi.tencent.com/openapi/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -41,22 +39,23 @@ export default async function handler(req, res) {
         });
 
         const data = await response.json();
+        console.log("腾讯元器返回:", JSON.stringify(data));
 
-        // 处理腾讯返回的结果
+        if (data.error) {
+            return res.status(500).json({ success: false, error: data.error.message || '元器API报错' });
+        }
+
         if (data.choices && data.choices.length > 0) {
             return res.status(200).json({ 
                 success: true, 
                 reply: data.choices[0].message.content 
             });
         } else {
-            return res.status(500).json({ 
-                success: false, 
-                error: data.error ? data.error.message : '元器返回未知错误' 
-            });
+            return res.status(500).json({ success: false, error: '元器返回了空内容' });
         }
 
     } catch (error) {
         console.error('API Error:', error);
-        return res.status(500).json({ success: false, error: '服务器连接失败' });
+        return res.status(500).json({ success: false, error: 'Vercel 连接失败: ' + error.message });
     }
 }
